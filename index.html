@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Heart Disease Predictor</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom scrollbar for aesthetic */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1; /* slate-300 */
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8; /* slate-400 */
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              primary: "#ef4444" /* Red-500 */,
+              secondary: "#f97316" /* Orange-500 */,
+              success: "#10b981" /* Emerald-500 */,
+              danger: "#ef4444",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-gray-50 min-h-screen p-4 font-sans flex items-center justify-center"
+  >
+    <div
+      class="w-full max-w-4xl bg-white shadow-2xl rounded-xl p-8 md:p-10 border border-gray-100"
+    >
+      <header class="text-center mb-8">
+        <h1 class="text-4xl font-extrabold text-primary mb-2">
+          Heart Disease Risk Predictor
+        </h1>
+        <p class="text-gray-500">
+          Input patient clinical parameters below to predict the probability of
+          heart disease.
+        </p>
+      </header>
+
+      <form id="predictionForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- (All form fields unchanged) -->
+        <!-- Age -->
+        <div class="col-span-1">
+          <label for="age" class="block text-sm font-medium text-gray-700">
+            Age (Years)
+            <span class="text-xs font-normal text-gray-500 block"
+              >Range: 1 to 119 years.</span
+            >
+          </label>
+          <input
+            type="number"
+            id="age"
+            name="age"
+            required
+            min="1"
+            max="119"
+            step="1"
+            placeholder="e.g., 52"
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          />
+        </div>
+
+        <!-- Sex -->
+        <div class="col-span-1">
+          <label for="sex" class="block text-sm font-medium text-gray-700">
+            Sex
+            <span class="text-xs font-normal text-gray-500 block"
+              >1 = Male, 0 = Female.</span
+            >
+          </label>
+          <select
+            id="sex"
+            name="sex"
+            required
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          >
+            <option value="" disabled selected>Select Gender</option>
+            <option value="1">1 - Male</option>
+            <option value="0">0 - Female</option>
+          </select>
+        </div>
+
+        <!-- Trestbps (Resting BP) -->
+        <div class="col-span-1">
+          <label for="trestbps" class="block text-sm font-medium text-gray-700">
+            Resting Blood Pressure (trestbps)
+            <span class="text-xs font-normal text-gray-500 block"
+              >Range: 50 to 250 mm Hg.</span
+            >
+          </label>
+          <input
+            type="number"
+            id="trestbps"
+            name="trestbps"
+            required
+            min="50"
+            max="250"
+            step="1"
+            placeholder="e.g., 125"
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          />
+        </div>
+
+        <!-- Chol (Cholesterol) -->
+        <div class="col-span-1">
+          <label for="chol" class="block text-sm font-medium text-gray-700">
+            Serum Cholesterol (chol)
+            <span class="text-xs font-normal text-gray-500 block"
+              >Range: 100 to 700 mg/dl.</span
+            >
+          </label>
+          <input
+            type="number"
+            id="chol"
+            name="chol"
+            required
+            min="100"
+            max="700"
+            step="1"
+            placeholder="e.g., 212"
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          />
+        </div>
+
+        <!-- Cp (Chest Pain Type) -->
+        <div class="col-span-1">
+          <label for="cp" class="block text-sm font-medium text-gray-700">
+            Chest Pain Type (cp)
+            <span class="text-xs font-normal text-gray-500 block"
+              >Select the type of chest pain experienced.</span
+            >
+          </label>
+          <select
+            id="cp"
+            name="cp"
+            required
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          >
+            <option value="" disabled selected>Select Type</option>
+            <option value="0">0 - Typical Angina</option>
+            <option value="1">1 - Atypical Angina</option>
+            <option value="2">2 - Non-Anginal Pain</option>
+            <option value="3">3 - Asymptomatic</option>
+          </select>
+        </div>
+
+        <!-- Fbs (Fasting Blood Sugar) -->
+        <div class="col-span-1">
+          <label for="fbs" class="block text-sm font-medium text-gray-700">
+            Fasting Blood Sugar > 120 mg/dL? (fbs)
+            <span class="text-xs font-normal text-gray-500 block"
+              >1 = True, 0 = False.</span
+            >
+          </label>
+          <select
+            id="fbs"
+            name="fbs"
+            required
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          >
+            <option value="" disabled selected>Select Status</option>
+            <option value="1">1 - True</option>
+            <option value="0">0 - False</option>
+          </select>
+        </div>
+
+        <!-- Restecg (Resting ECG) -->
+        <div class="col-span-1">
+          <label for="restecg" class="block text-sm font-medium text-gray-700">
+            Resting Electrocardiographic Results (restecg)
+            <span class="text-xs font-normal text-gray-500 block"
+              >ECG results at rest.</span
+            >
+          </label>
+          <select
+            id="restecg"
+            name="restecg"
+            required
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          >
+            <option value="" disabled selected>Select Result</option>
+            <option value="0">0 - Normal</option>
+            <option value="1">1 - ST-T Wave Abnormality</option>
+            <option value="2">2 - Left Ventricular Hypertrophy</option>
+          </select>
+        </div>
+
+        <!-- Thalach (Max Heart Rate) -->
+        <div class="col-span-1">
+          <label for="thalach" class="block text-sm font-medium text-gray-700">
+            Maximum Heart Rate Achieved (thalach)
+            <span class="text-xs font-normal text-gray-500 block"
+              >Highest heart rate during exercise. Range: 40 to 250 bpm.</span
+            >
+          </label>
+          <input
+            type="number"
+            id="thalach"
+            name="thalach"
+            required
+            min="40"
+            max="250"
+            step="1"
+            placeholder="e.g., 168"
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          />
+        </div>
+
+        <!-- Exang (Exercise Induced Angina) -->
+        <div class="col-span-1">
+          <label for="exang" class="block text-sm font-medium text-gray-700">
+            Exercise Induced Angina? (exang)
+            <span class="text-xs font-normal text-gray-500 block"
+              >Chest pain induced by exercise. 1 = Yes, 0 = No.</span
+            >
+          </label>
+          <select
+            id="exang"
+            name="exang"
+            required
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          >
+            <option value="" disabled selected>Select Status</option>
+            <option value="1">1 - Yes</option>
+            <option value="0">0 - No</option>
+          </select>
+        </div>
+
+        <!-- Oldpeak (ST Depression) -->
+        <div class="col-span-1">
+          <label for="oldpeak" class="block text-sm font-medium text-gray-700">
+            ST Depression (oldpeak)
+            <span class="text-xs font-normal text-gray-500 block"
+              >ST depression induced by exercise relative to rest. Range: 0.0 to
+              10.0.</span
+            >
+          </label>
+          <input
+            type="number"
+            id="oldpeak"
+            name="oldpeak"
+            required
+            min="0.0"
+            max="10.0"
+            step="0.1"
+            placeholder="e.g., 1.0"
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          />
+        </div>
+
+        <!-- Slope (Peak ST Segment Slope) -->
+        <div class="col-span-1">
+          <label for="slope" class="block text-sm font-medium text-gray-700">
+            Peak Exercise ST Segment Slope (slope)
+            <span class="text-xs font-normal text-gray-500 block"
+              >The slope of the peak exercise ST segment.</span
+            >
+          </label>
+          <select
+            id="slope"
+            name="slope"
+            required
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          >
+            <option value="" disabled selected>Select Slope</option>
+            <option value="0">0 - Upsloping</option>
+            <option value="1">1 - Flat</option>
+            <option value="2">2 - Downsloping</option>
+          </select>
+        </div>
+
+        <!-- Ca (Number of Major Vessels) -->
+        <div class="col-span-1">
+          <label for="ca" class="block text-sm font-medium text-gray-700">
+            Number of Major Vessels (ca)
+            <span class="text-xs font-normal text-gray-500 block"
+              >Number of major vessels (0–3) colored by fluoroscopy.</span
+            >
+          </label>
+          <select
+            id="ca"
+            name="ca"
+            required
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          >
+            <option value="" disabled selected>Select Count</option>
+            <option value="0">0 Vessels</option>
+            <option value="1">1 Vessel</option>
+            <option value="2">2 Vessels</option>
+            <option value="3">3 Vessels</option>
+          </select>
+        </div>
+
+        <!-- Thal (Thalassemia) -->
+        <div class="col-span-1">
+          <label for="thal" class="block text-sm font-medium text-gray-700">
+            Thalassemia Type (thal)
+            <span class="text-xs font-normal text-gray-500 block"
+              >A blood disorder.</span
+            >
+          </label>
+          <select
+            id="thal"
+            name="thal"
+            required
+            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary"
+          >
+            <option value="" disabled selected>Select Type</option>
+            <option value="1">1 - Normal</option>
+            <option value="2">2 - Fixed Defect</option>
+            <option value="3">3 - Reversible Defect</option>
+          </select>
+        </div>
+      </form>
+
+      <!-- Submit Button and Loading Indicator -->
+      <div class="mt-8">
+        <button
+          id="submitButton"
+          type="button"
+          onclick="submitForm()"
+          class="w-full py-3 px-4 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-secondary transition duration-150 transform hover:scale-[1.01] flex items-center justify-center"
+        >
+          <span id="buttonText">Predict Heart Disease Risk</span>
+          <svg
+            id="loadingSpinner"
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Result Display Area -->
+      <div
+        id="resultCard"
+        class="mt-8 p-6 rounded-xl border-2 border-dashed border-gray-200 hidden"
+      >
+        <h3 class="text-xl font-semibold mb-3 text-gray-700">
+          Prediction Result
+        </h3>
+        <div id="predictionResult" class="text-3xl font-extrabold mb-2"></div>
+        <div id="probabilityDisplay" class="text-lg text-gray-600"></div>
+        <div id="probability0Display" class="text-lg text-gray-600"></div>
+        <div id="confidenceDisplay" class="text-sm text-gray-500 mt-1"></div>
+      </div>
+
+      <!-- Error Message Area -->
+      <div
+        id="errorAlert"
+        class="mt-8 p-4 rounded-lg bg-red-100 border border-red-400 text-red-700 hidden"
+      >
+        <p class="font-bold">Error:</p>
+        <p id="errorMessage"></p>
+      </div>
+
+      <!-- Disclaimer Message -->
+      <p
+        class="mt-8 text-center text-xs text-gray-500 italic pt-4 border-t border-gray-100"
+      >
+        (Disclaimer: This tool provides a risk assessment and is not a
+        substitute for professional medical advice.)
+      </p>
+    </div>
+
+    <script>
+      const API_URL = "http://127.0.0.1:8000/predict";
+      const form = document.getElementById("predictionForm");
+      const submitButton = document.getElementById("submitButton");
+      const buttonText = document.getElementById("buttonText");
+      const loadingSpinner = document.getElementById("loadingSpinner");
+      const resultCard = document.getElementById("resultCard");
+      const predictionResult = document.getElementById("predictionResult");
+      const probabilityDisplay = document.getElementById("probabilityDisplay");
+      const probability0Display = document.getElementById(
+        "probability0Display"
+      );
+      const confidenceDisplay = document.getElementById("confidenceDisplay");
+      const errorAlert = document.getElementById("errorAlert");
+      const errorMessage = document.getElementById("errorMessage");
+
+      function setLoading(isLoading) {
+        submitButton.disabled = isLoading;
+        if (isLoading) {
+          buttonText.textContent = "Predicting...";
+          loadingSpinner.classList.remove("hidden");
+          resultCard.classList.add("hidden");
+          errorAlert.classList.add("hidden");
+        } else {
+          buttonText.textContent = "Predict Heart Disease Risk";
+          loadingSpinner.classList.add("hidden");
+        }
+      }
+
+      async function submitForm() {
+        if (!form.reportValidity()) {
+          return;
+        }
+
+        setLoading(true);
+
+        const payload = {
+          age: parseInt(document.getElementById("age").value),
+          sex: parseInt(document.getElementById("sex").value),
+          cp: parseInt(document.getElementById("cp").value),
+          trestbps: parseInt(document.getElementById("trestbps").value),
+          chol: parseInt(document.getElementById("chol").value),
+          fbs: parseInt(document.getElementById("fbs").value),
+          restecg: parseInt(document.getElementById("restecg").value),
+          thalach: parseInt(document.getElementById("thalach").value),
+          exang: parseInt(document.getElementById("exang").value),
+          oldpeak: parseFloat(document.getElementById("oldpeak").value),
+          slope: parseInt(document.getElementById("slope").value),
+          ca: parseInt(document.getElementById("ca").value),
+          thal: parseInt(document.getElementById("thal").value),
+        };
+
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            let errText = `HTTP error! Status: ${response.status}`;
+            try {
+              const errorData = await response.json();
+              errText =
+                errorData.detail || JSON.stringify(errorData) || errText;
+            } catch (_) {}
+            throw new Error(errText);
+          }
+
+          const data = await response.json();
+
+          // Backwards-compatible handling:
+          resultCard.classList.remove("hidden");
+          resultCard.classList.remove("border-danger", "border-success");
+          confidenceDisplay.textContent = "";
+          probabilityDisplay.textContent = "";
+          probability0Display.textContent = "";
+
+          // Derive numericPrediction and textual label
+          let numericPrediction = null;
+          let textualPrediction = null;
+
+          if (
+            typeof data.predicted_category !== "undefined" &&
+            data.predicted_category !== null
+          ) {
+            textualPrediction = data.predicted_category;
+            if (String(textualPrediction).toLowerCase().startsWith("pos")) {
+              numericPrediction = 1;
+            } else if (
+              String(textualPrediction).toLowerCase().startsWith("neg")
+            ) {
+              numericPrediction = 0;
+            }
+          } else if (
+            typeof data.prediction !== "undefined" &&
+            data.prediction !== null
+          ) {
+            numericPrediction = Number(data.prediction);
+            textualPrediction =
+              numericPrediction === 1 ? "Positive" : "Negative";
+          }
+
+          // Determine probabilities for class 1 and class 0
+          let prob1 = undefined;
+          let prob0 = undefined;
+
+          if (
+            data.class_probabilities &&
+            typeof data.class_probabilities === "object"
+          ) {
+            // Support both string keys ("0","1") and numeric keys (0,1)
+            if (typeof data.class_probabilities["1"] !== "undefined") {
+              prob1 = Number(data.class_probabilities["1"]);
+            } else if (typeof data.class_probabilities[1] !== "undefined") {
+              prob1 = Number(data.class_probabilities[1]);
+            }
+            if (typeof data.class_probabilities["0"] !== "undefined") {
+              prob0 = Number(data.class_probabilities["0"]);
+            } else if (typeof data.class_probabilities[0] !== "undefined") {
+              prob0 = Number(data.class_probabilities[0]);
+            }
+          } else if (typeof data.probability_of_heart_disease !== "undefined") {
+            // old API: probability_of_heart_disease -> probability of class 1
+            prob1 = Number(data.probability_of_heart_disease);
+            prob0 = 1 - prob1;
+          } else if (typeof data.probability !== "undefined") {
+            // in case some API returns "probability"
+            prob1 = Number(data.probability);
+            prob0 = 1 - prob1;
+          }
+
+          // If only one probability available (prob1), ensure prob0 computed
+          if (
+            (prob0 === undefined || Number.isNaN(prob0)) &&
+            typeof prob1 === "number"
+          ) {
+            prob0 = 1 - prob1;
+          }
+          if (
+            (prob1 === undefined || Number.isNaN(prob1)) &&
+            typeof prob0 === "number"
+          ) {
+            prob1 = 1 - prob0;
+          }
+
+          // Determine confidence
+          let confidence = undefined;
+          if (typeof data.confidence !== "undefined") {
+            confidence = data.confidence;
+          } else if (typeof data.confidence_score !== "undefined") {
+            confidence = data.confidence_score;
+          } else if (typeof prob1 === "number" && !Number.isNaN(prob1)) {
+            confidence = Math.max(prob1, 1 - prob1);
+            confidence = Math.round(confidence * 1000) / 1000;
+          }
+
+          // Display prediction label
+          const isPositive =
+            numericPrediction === 1 ||
+            (textualPrediction &&
+              String(textualPrediction).toLowerCase().startsWith("pos"));
+          if (isPositive) {
+            predictionResult.textContent = "POSITIVE for Heart Disease";
+            predictionResult.classList.remove("text-success");
+            predictionResult.classList.add("text-danger");
+            resultCard.classList.add("border-danger");
+          } else {
+            predictionResult.textContent = "NEGATIVE for Heart Disease";
+            predictionResult.classList.remove("text-danger");
+            predictionResult.classList.add("text-success");
+            resultCard.classList.add("border-success");
+          }
+
+          // Display probability class=1
+          if (
+            typeof prob1 !== "undefined" &&
+            prob1 !== null &&
+            !Number.isNaN(Number(prob1))
+          ) {
+            const probabilityPercent = (Number(prob1) * 100).toFixed(2);
+            probabilityDisplay.textContent = `Probability (class=1): ${probabilityPercent}%`;
+          } else {
+            probabilityDisplay.textContent = `Probability (class=1): N/A`;
+          }
+
+          // Display probability class=0
+          if (
+            typeof prob0 !== "undefined" &&
+            prob0 !== null &&
+            !Number.isNaN(Number(prob0))
+          ) {
+            const probability0Percent = (Number(prob0) * 100).toFixed(2);
+            probability0Display.textContent = `Probability (class=0): ${probability0Percent}%`;
+          } else {
+            probability0Display.textContent = `Probability (class=0): N/A`;
+          }
+
+          // Display confidence
+          if (
+            typeof confidence !== "undefined" &&
+            confidence !== null &&
+            !Number.isNaN(Number(confidence))
+          ) {
+            const confPercent = (Number(confidence) * 100).toFixed(2);
+            confidenceDisplay.textContent = `Confidence: ${confPercent}%`;
+          } else {
+            confidenceDisplay.textContent = "";
+          }
+        } catch (error) {
+          console.error("Fetch Error:", error);
+          errorMessage.textContent = error.message;
+          errorAlert.classList.remove("hidden");
+        } finally {
+          setLoading(false);
+        }
+      }
+    </script>
+  </body>
+</html>
