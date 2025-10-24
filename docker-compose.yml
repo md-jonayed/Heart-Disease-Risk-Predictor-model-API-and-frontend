@@ -1,0 +1,41 @@
+version: '3.8'
+
+# Define a custom network for the services to communicate with service names
+networks:
+  heart-app-network:
+    driver: bridge
+
+services:
+
+  # 1. FastAPI Backend Service (The API)
+  fastapi-service:
+    # Your image tag
+    image: jonayed19/heart-disease-prediction-api:latest
+    container_name: heart-api
+    # Explicitly run Uvicorn to ensure it binds to 0.0.0.0 for external access
+    command: uvicorn app:app --host 0.0.0.0 --port 8000
+    # Map container port 8000 to host port 8000
+    ports:
+      - "8000:8000"
+    networks:
+      - heart-app-network
+    # Restart the service if it crashes
+    restart: always
+
+  # 2. Streamlit Frontend Service (The UI)
+  streamlit-frontend:
+    # Use the same image
+    image: jonayed19/heart-disease-prediction-api:latest
+    container_name: heart-frontend
+    # Command to run Streamlit, overwriting the default FastAPI CMD
+    # We disable XSRF protection for ease of local testing.
+    command: streamlit run frontend.py --server.port 8501 --server.enableCORS true --server.enableXsrfProtection false
+    # Map container port 8501 to host port 8501
+    ports:
+      - "8501:8501"
+    networks:
+      - heart-app-network
+    # Ensure the frontend starts AFTER the API is ready
+    depends_on:
+      - fastapi-service
+    restart: always
