@@ -4,7 +4,7 @@ import json
 
 # --- Configuration ---
 # NOTE: Ensure your FastAPI/Backend server is running on this address
-API_URL = "http://127.0.0.1:8000/predict"
+API_URL = "http://fastapi-service:8000/predict"
 
 # Set Streamlit page configuration
 st.set_page_config(
